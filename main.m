@@ -15,7 +15,7 @@ data.material.k = 10e-4; %m/s
 data.material.g = 9.81e3; %N/m3
 data.material.peso_esp_sat = 19e3; %N/m3
 data.material.peso_esp_ap = 17e3; %N/m3
-data.etype = 'Quadrilateral_9'; %cuadrilatero cuadr?ticos
+data.etype='Quadrilateral9s_flujo';
 data.material.type = 'PlaneStrain2D';
 
 %% Escribimos la malla, sin datos, solo geometria
@@ -56,18 +56,18 @@ data.fixed.values = total_fixed_values;
 clear fixed b m1 n1 c1 d1 fixed_roca fixed_laterales;
 
 %% Altura piezometrica
-##data.ndofn = 1; %gdl por nodo (para la altura piezometrica es 1)
-##data.map = fem.dofMap(data.element, data.ndofn);
-#### Necesario para la altura piezometrica
-##data.material.type='PlainStrain2D';
-##K=fem.assemble_K(data);
-##f=zeros(size(K,1),1);
-##
-##h=fem.solveLS(K,f,data.fixed.dofs,data.fixed.values);
-##GMSH.writeNodalSolution('Resultados/Ap1.msh','Altura Piezometrica',1,1,h);
+data.ndofn = 1; %gdl por nodo (para la altura piezometrica es 1)
+data.map = fem.dofMap(data.element, data.ndofn);
+
+K=fem.assemble_K(data);
+f=zeros(size(K,1),1);
+
+h=fem.solveLS(K,f,data.fixed.dofs,data.fixed.values);
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Altura Piezometrica',1,1,h);
+
 
 % Presiones intersticiales
-u=data.material.gamma_w*(h-data.node(:,2));
+u=data.material.g*(h-data.node(:,2));
 secos=find(data.node(:,2)>25);
 u(secos)=0;
 GMSH.writeNodalSolution('Resultados/Ap1.msh','Presiones Intersticiales',1,1,u);
@@ -75,6 +75,8 @@ GMSH.writeNodalSolution('Resultados/Ap1.msh','Presiones Intersticiales',1,1,u);
 %% Desplazamientos
 data.ndofn = 2; %gdl por nodo (para los desplazamientos es 2)
 data.map = fem.dofMap(data.element, data.ndofn);
+data.etype = 'Quadrilateral_9'; %cuadrilatero cuadr?ticos
+
 K=fem.assemble_K(data);
 f = fem.assemble_fb(data);
 
@@ -88,22 +90,21 @@ dy = d(2:2:end);
 GMSH.writeNodalSolution('Resultados/Ap1.msh','Desplazamientos Iniciales_X',1,1,dx);
 GMSH.writeNodalSolution('Resultados/Ap1.msh','Desplazamientos Iniciales_Y',1,1,dy);
 
-
 %%Tensiones Totales
-sigma=fem.assemble_S(data,d);
+sigma =fem.assemble_S(data,d,3);
+
 
 %%Tensiones Efectivas
 [i,j]=find(u<=0);
 u(i)=u(i).*0;
-sigma.xx_efec=sigma.xx-u;%OJO SIGNOS
+sigma.xx_efec=sigma.xx-u;
 sigma.yy_efec=sigma.yy-u;
 
-
-%Mallador
-GMSH.writeNodalSolution2GMSH('pablomonleon','Sxx efectivas',1,1,sigma.xx_efec);
-GMSH.writeNodalSolution2GMSH('pablomonleon','Syy efectivas',1,1,sigma.yy_efec);
-GMSH.writeNodalSolution2GMSH('pablomonleon','Sxx',1,1,sigma.xx);
-GMSH.writeNodalSolution2GMSH('pablomonleon','Syy',1,1,sigma.yy);
-GMSH.writeNodalSolution2GMSH('pablomonleon','Tau xy',1,1,sigma.xy);
+% Guardamos resultados
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Sxx efectivas',1,1,sigma.xx_efec);
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Syy efectivas',1,1,sigma.yy_efec);
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Sxx',1,1,sigma.xx);
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Syy',1,1,sigma.yy);
+GMSH.writeNodalSolution('Resultados/Ap1.msh','Tau xy',1,1,sigma.xy);
 
 return;

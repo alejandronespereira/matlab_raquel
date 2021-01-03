@@ -1,10 +1,13 @@
-function [Se] = SeQuadrilateral_9(nodes, material, de)
+function [Se] = SeQuadrilateral_9(node, material, de)
 
 ngp=9;
 
 weight=[25 25 25 25 40 40 40 40 64]./81;
-chi=[-1 1 1 -1 0 1 0 -1 0].*sqrt(0.6);
-eta=[-1 -1 1 1 -1 0 1 0  0].*sqrt(0.6);
+chi_n=[-1 1 1 -1 0 1 0 -1 0];
+chi = chi_n.*sqrt(0.6);
+eta_n=[-1 -1 1 1 -1 0 1 0  0];
+eta = eta_n.*sqrt(0.6);
+
 
 %Material
 e = material.e;
@@ -34,7 +37,7 @@ N=@(chi,eta) [0.25*chi*(chi-1)*eta*(eta-1);
     0.5*chi*(chi-1)*(1-eta^2);
     (1-chi^2)*(1-eta^2)];
 
-dNchi=@(chi,eta) [0.25*(2*chi-1)*eta*(eta-1);
+dNchi=@(chi,eta) [0.25*(2*chi-1) * eta * (eta-1);
     0.25*(2*chi+1)*eta*(eta-1);
     0.25*(2*chi+1)*eta*(eta+1);
     0.25*(2*chi-1)*eta*(eta+1);
@@ -58,15 +61,19 @@ dNeta=@(chi,eta) [0.25*chi*(chi-1)*(2*eta-1);
 
 xcoords = node(:,1); ycoords = node(:,2);
 
-Je = @(chi,eta) [xcoords'*dNchi(eta) ydoords'*dNchi(eta);
-    xcoords'*dNeta(chi) ycoords'*dNeta(chi)];
-
+Je = @(chi,eta) [xcoords'*dNchi(chi,eta) ycoords'*dNchi(chi,eta);
+                 xcoords'*dNeta(chi,eta) ycoords'*dNeta(chi,eta)];
+                 
+J = @(chi,eta) [xcoords'*dNchi(chi,eta) ycoords'*dNchi(chi,eta);
+                xcoords'*dNeta(chi,eta) ycoords'*dNeta(chi,eta)];                 
+           
 Se = zeros(9,3);  %3 componentes de tensi?n para cada nodo (9)
 
 for k=1:ngp
-    Jk=Je(chi(k),eta(k));
-    dNk=inv(Jk)*[dNchi(eta(k))';dNeta(chi(k))'];
-    %dNk = inv(Jk)*[dNchi(chi(k), eta(k))'; dNeta(chi(k), eta(k))'];
+    Jk=J(chi(k),eta(k));
+    
+    invJk=Jk\eye(2);
+    dNk=invJk*[dNchi(chi(k),eta(k))';dNeta(chi(k),eta(k))'];
     
     Bk=zeros(3,18);
     Bk(1,1:2:18)= dNk(1,:);
@@ -77,6 +84,6 @@ for k=1:ngp
     Sk=(D*Bk)*de;
     
 for i = 1:9
-        Se = Se + N(chi_n(i),eta_n(i))*Sk';
+        Se = Se + N(chi(i),eta(i))*Sk';
  end
 end
