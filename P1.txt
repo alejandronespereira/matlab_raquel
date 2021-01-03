@@ -1,0 +1,58 @@
+// Inputs
+R = 5;    // Radius
+x_c = 35; // X-Coordinate value for center of circle
+y_c = 15; // Y-Coordinate value for center of circle
+gridsize = 1; // Element size
+
+// Geometry
+Point(1) = {0, 0, 0, gridsize};
+Point(2) = {50, 0, 0, gridsize};
+Point(3) = {50, 25, 0, gridsize};
+Point(4) = {0, 25, 0, gridsize};
+Point(5) = {0, 30, 0, gridsize};
+Point(6) = {50, 30, 0, gridsize};
+
+Line(1) = {1, 2};
+Line(2) = {2, 3};
+Line(3) = {3, 4};
+Line(4) = {4, 1};
+Line(5) = {3, 6};
+Line(6) = {6, 5};
+Line(7) = {5, 4};
+
+// Tunnel 
+Point(7) = { x_c, y_c, 0, gridsize};	
+Point(8) = { x_c+R, y_c, 0, gridsize}; 
+Point(9) = { x_c, y_c+R, 0, gridsize}; 
+Point(10) = {x_c-R, y_c, 0, gridsize}; 
+Point(11) = { x_c , y_c-R, 0, gridsize};
+
+Circle(8) = {8,7,9}; 
+Circle(9) = {9,7,10}; 
+Circle(10) = {10,7,11}; 
+Circle(11) = {11,7,8};
+
+// Saturated soil		
+Line Loop(12) = {1, 2, 3, 4};
+Line Loop(13) = {8,9,10,11};
+Plane Surface(1) = {12,13};
+
+Recombine Surface {1};
+Physical Surface("Wet") = {1};
+
+// Humid soil
+Line Loop(14) = {-3, 5, 6, 7};
+Plane Surface(2) = {14};
+Recombine Surface {2};
+Physical Surface("Dry") = {2};
+
+//Transfinite surfaces:
+Transfinite Surface {2};
+Recombine Surface {2};
+
+// Mesh
+Mesh.MshFileVersion = 2.2 ;    // Output file old version
+Mesh.ElementOrder = 2;         // Quadratic elements
+Mesh.SubdivisionAlgorithm = 1; // All quadrilaterals
+Mesh 2;                        // for 2D
+
