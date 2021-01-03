@@ -1,5 +1,5 @@
 function writeNodalSolutionGMSH(file_name, name, step, time, solution)
-gmsh = fopen([file_name '.msh'], 'a');
+gmsh = fopen(file_name, 'a');
 assert(gmsh>=0, 'Error opening file');
 
 [nn, n_comp] = size(solution);

@@ -6,6 +6,9 @@ ndof = data.n_nodes * data.ndofn;
 
 [n_elements,nndel] = size(data.element);
 
+timerVal = tic;
+disp('Generando K');
+
 ndofel = nndel * data.ndofn;
 nvalel = ndofel*ndofel;
 
@@ -31,6 +34,7 @@ for e = 1:n_elements
 end
 
 K = sparse(Krow,Kcol,Kval,ndof,ndof);
+toc(timerVal);
 
 end
 

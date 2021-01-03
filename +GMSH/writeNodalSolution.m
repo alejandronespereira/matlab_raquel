@@ -1,7 +1,7 @@
 function writeNodalSolution(file_name,name,step,time,solution)
 
-gmsh=fopen([file_name '.msh'],'a','n');
-%gmsh = fopen(file_name,'a', 'n'); %pongo apend 'a' y 'n'
+gmsh=fopen(file_name,'a','n');
+
 assert(gmsh>=0 ,'ERROR opening file');
 
 [n_nodes,n_comp]=size(solution);
