@@ -4,9 +4,8 @@ clc;
 
 %DATOS DEL PROBLEMA
 
-
 %leemos la malla
-data = GMSH.readMesh('P1.msh');
+data = GMSH.readMesh('P1_NOTUNEL.msh');
 
 %a?adimos el material
 data.material.e = 15e6; %Pa
@@ -22,47 +21,22 @@ data.material.type = 'PlaneStrain2D';
 GMSH.writeMesh(data,'Resultados/Ap1.msh'); %contiene la malla no tiene resultados aun
 
 %% Condiciones de contorno
+cdc.altura_suelo_humedo = 30;
+cdc.altura_suelo_impermeable = 25;
+cdc.roca_impermeable = 0;
+cdc.edificio = [10,20];
+cdc.pared_izquierda = 0;
+cdc.pared_derecha = 50;
 
-data.cdc.altura_suelo_humedo = 30;
-data.cdc.altura_suelo_impermeable = 25;
-data.cdc.roca_impermeable = 0;
-
-data.cdc.limite_derecho = 50;
-data.cdc.limite_izquierdo = 0;
-
-data.cdc.edificio = [10,20];
-
-fixed_roca = find(data.node(:,2) == data.cdc.roca_impermeable); % Limite contra la roca
-fixed_laterales = find(data.node(:,1) == data.cdc.limite_derecho | data.node(:,1) == data.cdc.limite_izquierdo); % Limites del problema hacia los lados
-fixed_edificio = find(data.node(:,1) <= data.cdc.edificio(2) & data.node(:,1) >= data.cdc.edificio(1) & data.node(:,2) == data.cdc.altura_suelo_humedo);
-
-fixed = [fixed_roca;fixed_laterales];
-
-% Quitamos los elementos repetidos: 
-% https://www.mathworks.com/matlabcentral/answers/16667-how-to-remove-repeating-elements-from-an-array
-[b,m1,n1] =  unique(fixed,'first'); % b son los valores unicos, y se cumple 'b=fixed(m1)' y 'fixed = b(n1)'
-[c1,d1] = sort(m1);
-
-unique_fixed = b(d1);
-unique_fixed_values = zeros(size(unique_fixed));
-
-total_fixed = [unique_fixed;fixed_edificio];
-total_fixed_values = [unique_fixed_values;-0.25 * ones(size(fixed_edificio))];
-
-data.fixed.dofs = total_fixed;
-data.fixed.values = total_fixed_values;
-
-% Limpiamos variables auxiliares
-clear fixed b m1 n1 c1 d1 fixed_roca fixed_laterales;
 
 %% Altura piezometrica
 data.ndofn = 1; %gdl por nodo (para la altura piezometrica es 1)
 data.map = fem.dofMap(data.element, data.ndofn);
-
+fixed = funciones.get_fixed_cdc(data,cdc);
 K=fem.assemble_K(data);
 f=zeros(size(K,1),1);
 
-h=fem.solveLS(K,f,data.fixed.dofs,data.fixed.values);
+h=fem.solveLS(K,f,fixed.dofs,fixed.values);
 GMSH.writeNodalSolution('Resultados/Ap1.msh','Altura Piezometrica',1,1,h);
 
 
@@ -76,12 +50,13 @@ GMSH.writeNodalSolution('Resultados/Ap1.msh','Presiones Intersticiales',1,1,u);
 data.ndofn = 2; %gdl por nodo (para los desplazamientos es 2)
 data.map = fem.dofMap(data.element, data.ndofn);
 data.etype = 'Quadrilateral_9'; %cuadrilatero cuadr?ticos
+fixed = funciones.get_fixed_cdc(data,cdc);
 
 K=fem.assemble_K(data);
 f = fem.assemble_fb(data);
 
 tic;
-d = fem.solveLS(K,f,data.fixed.dofs,data.fixed.values);
+d = fem.solveLS(K,f,fixed.dofs,fixed.values);
 toc;
 
 dx = d(1:2:end);
