@@ -18,8 +18,8 @@ function K = KeBeam2D_member(beam_index,material,P,structure)
   c2 = material.c2;
   c3 = material.c3;
   
-  kappa_a = kappa * M_a;
-  theta_a = c1 * kappa_a + c2 * (kappa_a**3) + c3 * (kappa_a**5);
+  kappa_a = kappa * M_a
+  theta_a = c1 * kappa_a + c2 * (kappa_a**3) + c3 * (kappa_a**5)
   
   kappa_b = kappa * M_b;
   theta_b = c1 * kappa_b + c2 * (kappa_b**3) + c3 * (kappa_b**5);

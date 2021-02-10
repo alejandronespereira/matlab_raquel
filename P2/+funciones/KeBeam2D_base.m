@@ -66,6 +66,8 @@ function K = KeBeam2D_base(beam_index,material,P,structure)
   K_2(6,5) = -(rij + rjj) * E * I / (L**2);
   K_2(6,6) = rjj * E * I /L;
   
+  K_conventional = zeros(6,6);
+  K_2 = K_2 + K_conventional;
   
   K = K_1 + K_2;
   # Hacer la matriz simetrica

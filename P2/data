@@ -1,4 +1,4 @@
-# Created by Octave 5.2.0, Sun Jan 24 20:09:40 2021 CET <alejandro@alejandro>
+# Created by Octave 5.2.0, Sun Jan 24 20:09:40 2021 CET <raquel@raquel>
 # name: data
 # type: scalar struct
 # ndims: 2
@@ -76,9 +76,3 @@ Connection2D
 # name: A
 # type: scalar
 0.10000000000000001
-
-
-
-
-
-

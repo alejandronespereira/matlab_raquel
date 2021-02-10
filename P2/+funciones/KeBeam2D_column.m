@@ -18,6 +18,9 @@ function K = KeBeam2D_column(beam_index,material,P,structure)
   K(6,5) = -L/10;
   K(6,6) = L* L / 7.5;
   K = Paxial * K / L;    
+  K_conventional = zeros(6,6);
+  
+  K = K + K_conventional;
   
   # Hacer la matriz simetrica
   for i = 1:6
