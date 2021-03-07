@@ -32,7 +32,7 @@ function [u,lambda] = corregir(u,delta_u,lambda,delta_lambda,q,data)
   % Bucle de correccion
   k = 1;
   while(k <= kmax && conv >= epsilon)
-##    fprintf('Iteracion=%3d \t Residuo =%7.5e \n',k,conv);
+%    fprintf('Iteracion=%3d \t Residuo =%7.5e \n',k,conv);
     Kt=fem.Ktangente(u_k,data);
   
     y=Solver.solveLS(Kt,q,data.fixed.nodes,data.fixed.values);
@@ -67,7 +67,7 @@ function [u,lambda] = corregir(u,delta_u,lambda,delta_lambda,q,data)
   if k>=data.kmax
     error('No convergen en la iteración %d\n',k-1);
   else
-##    fprintf('Residuo=%e\n',conv);
+%    fprintf('Residuo=%e\n',conv);
   end
   
   % Actualizamos valores

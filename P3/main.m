@@ -53,12 +53,10 @@ data.epsilon=1e-5;
 data.psi = 0;
 data.l = 0.1;
 data.n_steps = 200;
+data.step_criterio = 200;
 
 
 %% Dibujar estructura 
-
- ne = size(data.element,1);
- nn = size(data.nodes,1);
 
     
 % Especificamos los nodos fijos sin grado de libertad, todos los que estan en el suelo (z == 0)
@@ -74,43 +72,17 @@ end
 
 data.fixed.values = zeros(size(data.fixed.nodes));
 
-% assemble_q ya sabe que elementos tienen que fuerza y solo necesita la magnitud
 data.q = fem.assemble_q(data);
 
-[d,lambda] = Solver.arclength_solver(data);
+% Hacemos una ejecucion solo con el criterio del trabajo positivo
+% assemble_q ya sabe que elementos tienen que fuerza y solo necesita la magnitud
+[d_pos,lambda_pos] = Solver.arclength_solver(data);
 
-% Hora de dibujar graficas
+% Hacemos otra ejecucion en el que a partir del paso 40 usamos el criterio del angulo
+% 40 elegido empiricamente a ensayo y error
+data.step_criterio = 40;
+[d_angulo,lambda_angulo] = Solver.arclength_solver(data);
 
-subplot(2,2,1);
-
-scatter3(data.nodes(:,1),data.nodes(:,2),data.nodes(:,3),'filled','MarkerEdgeColor','k',...
-        'MarkerFaceColor','k') %dibuja circulos
-axis equal; hold on;
-
- for e=1:ne
-   n1 = data.element(e,1);
-   n2 = data.element(e,2); 
-   x1 = data.nodes(n1,1); x2 = data.nodes(n2,1);
-   y1 = data.nodes(n1,2); y2 = data.nodes(n2,2);
-   z1 = data.nodes(n1,3); z2 = data.nodes(n2,3);
-   
-   line([x1,x2],[y1,y2],[z1,z2],'Color','k');
- end
- %% 45 azimuth 30 elevacion
- view(45,30);
-
-% Fuerza horizontal en el nodo 7
-u = d(:,(7-1) *3 +1);
-% Fuerza vertical en el nodo 7
-v = d(:,(7-1) *3 +3);
-% Fuerza vertical en el nodo 8
-w = d(:,(8-1) *3 +3);
-
-subplot(2,2,2);
-plot(w,lambda/data.material.EA);
-subplot(2,2,3);
-plot(v,lambda/data.material.EA);
-subplot(2,2,4);
-plot(w,v);
-
+% Para de dibujar graficas
+f = fem.dibujar(data,lambda_pos,d_pos,lambda_angulo,d_angulo);
 

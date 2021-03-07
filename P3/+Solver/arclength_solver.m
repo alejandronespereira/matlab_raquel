@@ -31,7 +31,7 @@ function [uResults,lambdaResults,data] = arclength_solver (data)
     uResults(step,:) = u';
     lambdaResults(step) = lambda;
     
-##    fprintf('Paso %3d\n',step);
+%   fprintf('Paso %3d\n',step);
     %Resolvemos con el Arclength en cada paso
     [ u_n, lambda_n,data] = Solver.arcLength( u, lambda,data,step);
     
